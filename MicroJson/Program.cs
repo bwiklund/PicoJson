@@ -5,10 +5,12 @@ public class Dyn {
   public string? str;
   public double? num;
 
+  public string? AsString() => str;
+  public double? AsDouble() => num;
 }
 public static class Mjson {
-  public static bool Parse(string str, int idx = 0)
+  public static Dyn Parse(string str, int idx = 0)
   {
-    
+    return new Dyn() { str = "Not foo" };
   }
 }

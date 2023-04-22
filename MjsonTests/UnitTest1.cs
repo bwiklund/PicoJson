@@ -8,7 +8,7 @@ namespace MjsonTests {
     [Test]
     public void Test1()
     {
-      Assert.Pass();
+      Assert.That(Mjson.Parse("\"Foo\"").AsString(), Is.EqualTo("Foo"));
     }
   }
 }
