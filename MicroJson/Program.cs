@@ -51,7 +51,20 @@ public static class Mjson {
       switch (ch)
       {
         case '"': return new Dyn() { str = sb.ToString() };
-        case '\\': sb.Append(ctx.Next()); break;
+        case '\\':
+          var chEscaped = ctx.Next();
+          sb.Append(chEscaped switch
+          {
+            '"' => '"',
+            'b' => '\b',
+            'f' => '\f',
+            'n' => '\n',
+            'r' => '\r',
+            't' => '\t',
+            // TODO \u + 4 hex digits
+            _ => throw new Exception("Invalid escaped character: " + chEscaped)
+          });
+          break;
         default: sb.Append(ch); break;
       }
     }
