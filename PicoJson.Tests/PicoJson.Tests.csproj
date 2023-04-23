@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MicroJson\PicoJson.csproj" />
+    <ProjectReference Include="..\PicoJson\PicoJson.csproj" />
   </ItemGroup>
 
 </Project>
