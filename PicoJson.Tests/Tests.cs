@@ -1,3 +1,5 @@
+using System.Reflection;
+
 namespace MjsonTests {
   public class Tests {
     [SetUp]
@@ -47,6 +49,13 @@ namespace MjsonTests {
     }
 
     [Test]
+    public void WhiteSpace() {
+      Assert.That(PicoJson.Parse("1").AsNumber(), Is.EqualTo(1));
+      Assert.That(PicoJson.Parse(" 1 ").AsNumber(), Is.EqualTo(1));
+      Assert.That(PicoJson.Parse(" \n\r\t1\t\r\n ").AsNumber(), Is.EqualTo(1));
+    }
+
+    [Test]
     public void Objects() {
       void AssertObject(string json, Dyn expected) {
         var obj = PicoJson.Parse(json);
@@ -91,6 +100,23 @@ namespace MjsonTests {
       AssertArray(@" [ ""foo"" , ""bar"" , 1234 ] ", arrFooBarBaz);
       var arrNested = new Dyn(new List<Dyn>() { new Dyn(new List<Dyn>() { new Dyn("foo"), new Dyn("bar") }) });
       AssertArray(@"[[""foo"",""bar""]]", arrNested);
+    }
+
+    [Test]
+    public void RealData() {
+      // this assumes the input is minified
+      void AssertFile(string path) {
+        var jsonFile = File.ReadAllText(path).Replace("\r\n", "\n");
+        var obj = PicoJson.Parse(jsonFile);
+        var backToJson = obj.ToJson(); // should tostring really be the serialize method?
+        Assert.That(backToJson, Is.EqualTo(jsonFile));
+      }
+
+      AssertFile("Data/usgs.json");
+
+      // TODO also test minified variants
+
+      // TODO also test some bad inputs
     }
   }
 }

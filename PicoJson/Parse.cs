@@ -32,7 +32,7 @@ public static class PicoJson {
   static void WhiteSpace(Ctx ctx) {
     while (true) {
       var ch = ctx.Peek();
-      if (ch == ' ' || ch == '\n' || ch == 'r' || ch == '\t') {
+      if (ch == ' ' || ch == '\n' || ch == '\r' || ch == '\t') {
         ctx.Next();
         continue;
       }
@@ -60,7 +60,7 @@ public static class PicoJson {
           ctx.Next();
           break;
         default:
-          throw new Exception("Expected key or end of object");
+          throw new Exception($"Expected key or end of object at position {ctx.idx}, got '{ctx.Peek()}'");
       }
     }
   }

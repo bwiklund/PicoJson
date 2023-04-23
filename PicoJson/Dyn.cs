@@ -43,23 +43,37 @@ public class Dyn {
     return 0;
   }
 
-  public override string ToString() {
-    if (str != null) return str;
+  public string ToJson() {
+    if (str != null) return $"\"{str.ToString()}\""; // TODO escape
+
     if (num != null) return num.ToString();
-    if (@bool != null) return @bool.ToString();
-    if (arr != null) return arr.ToString();
+
+    if (@bool != null) return @bool.Value ? "true" : "false";
+
+    if (arr != null) {
+      var sb = new StringBuilder();
+      sb.Append('[');
+      for(var i  = 0; i < arr.Count; i++) {
+        if (i > 0) sb.Append(',');
+        sb.Append(arr[i].ToJson());
+      }
+      sb.Append(']');
+      return sb.ToString();
+    }
+
     if (obj != null) {
       var sb = new StringBuilder();
-      sb.Append("{");
+      sb.Append('{');
       var first = true;
       foreach (var kv in obj) {
         if (!first) sb.Append(",");
-        sb.Append("\"" + kv.Key + "\":" + kv.Value);
+        sb.Append("\"" + kv.Key + "\":" + kv.Value.ToJson());
         first = false;
       }
-      sb.Append("}");
+      sb.Append('}');
       return sb.ToString();
     }
+
     return "null";
   }
 }
