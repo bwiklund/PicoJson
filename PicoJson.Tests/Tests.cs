@@ -5,10 +5,17 @@ namespace MjsonTests {
     }
 
     [Test]
-    public void Strings() {
-      Assert.That(PicoJson.Parse("\"Foo\"").AsString(), Is.EqualTo("Foo"));
-      Assert.That(PicoJson.Parse("   \"Foo\"   ").AsString(), Is.EqualTo("Foo"));
-      Assert.That(PicoJson.Parse("\"\\\"\"").AsString(), Is.EqualTo("\""));
+    public void Nulls() {
+      Assert.That(PicoJson.Parse("null").IsNull(), Is.EqualTo(true));
+      Assert.That(PicoJson.Parse("   null   ").IsNull(), Is.EqualTo(true));
+    }
+
+    [Test]
+    public void Bools() {
+      Assert.That(PicoJson.Parse("true").AsBool(), Is.EqualTo(true));
+      Assert.That(PicoJson.Parse("false").AsBool(), Is.EqualTo(false));
+      Assert.That(PicoJson.Parse("   true   ").AsBool(), Is.EqualTo(true));
+      Assert.That(PicoJson.Parse("   false   ").AsBool(), Is.EqualTo(false));
     }
 
     [Test]
@@ -30,6 +37,13 @@ namespace MjsonTests {
       // Assert.Throws<Exception>(() => Mjson.Parse("0."));
       // todo bad inputs
       // todo exponents
+    }
+
+    [Test]
+    public void Strings() {
+      Assert.That(PicoJson.Parse("\"Foo\"").AsString(), Is.EqualTo("Foo"));
+      Assert.That(PicoJson.Parse("   \"Foo\"   ").AsString(), Is.EqualTo("Foo"));
+      Assert.That(PicoJson.Parse("\"\\\"\"").AsString(), Is.EqualTo("\""));
     }
 
     [Test]

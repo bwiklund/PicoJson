@@ -17,7 +17,9 @@ public static class PicoJson {
     WhiteSpace(ctx);
     Dyn value;
     var ch = ctx.Peek();
-    if (ch == '"') value = ParseString(ctx);
+    if (ch == 'n') value = ParseNull(ctx);
+    else if (ch == 't' || ch == 'f') value = ParseBool(ctx);
+    else if (ch == '"') value = ParseString(ctx);
     else if (ch == '{') value = ParseObject(ctx);
     else if (ch == '[') value = ParseArray(ctx);
     else if ((ch >= '0' && ch <= '9') || ch == '.' || ch == '-') value = ParseNumber(ctx);
@@ -79,6 +81,39 @@ public static class PicoJson {
     return arr;
   }
 
+  static Dyn ParseNull(Ctx ctx) {
+    // we already know the first char is n
+    ctx.Expect("null");
+    return new Dyn() { };
+  }
+
+  static Dyn ParseBool(Ctx ctx) {
+    // we already know the first char is either t or f
+    if (ctx.Accept("true")) {
+      return new Dyn() { @bool = true };
+    }
+    ctx.Expect("false");
+    return new Dyn() { @bool = false };
+  }
+
+  static Dyn ParseNumber(Ctx ctx) {
+    var sb = new StringBuilder(); // TODO keep me around i think
+
+    while (ctx.Peek() is char ch) {
+      if ((ch >= '0' && ch <= '9') || ch == '.' || ch == '-') // TODO exponents
+      {
+        sb.Append(ch);
+        ctx.Next();
+      } else {
+        break;
+      }
+    }
+
+    // TODO this doesn't handle the position/count of of - and . chars correctly, check the exact json spec
+
+    return new Dyn(double.Parse(sb.ToString())); // thanks .net. ok but actually is this spec the same? good enough for now
+  }
+
   static Dyn ParseString(Ctx ctx) {
     ctx.Expect('"');
     var sb = new StringBuilder(); // TODO keep me around i think
@@ -104,23 +139,5 @@ public static class PicoJson {
     }
 
     throw new Exception("String never ended!");
-  }
-
-  static Dyn ParseNumber(Ctx ctx) {
-    var sb = new StringBuilder(); // TODO keep me around i think
-
-    while (ctx.Peek() is char ch) {
-      if ((ch >= '0' && ch <= '9') || ch == '.' || ch == '-') // TODO exponents
-      {
-        sb.Append(ch);
-        ctx.Next();
-      } else {
-        break;
-      }
-    }
-
-    // TODO this doesn't handle the position/count of of - and . chars correctly, check the exact json spec
-
-    return new Dyn(double.Parse(sb.ToString())); // thanks .net. ok but actually is this spec the same? good enough for now
   }
 }

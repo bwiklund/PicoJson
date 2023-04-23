@@ -13,6 +13,8 @@ public class Dyn {
   public bool? AsBool() => @bool;
   public List<Dyn>? AsArray() => arr;
   public Dictionary<string, Dyn>? AsObject() => obj;
+  // might be better to have a real "isNull" bool to avoid doing this many checks? more state to manage tho.
+  public bool IsNull() => str == null && num == null && @bool == null && arr == null && obj == null;
 
   public Dyn() { }
   public Dyn(string str) { this.str = str; }
