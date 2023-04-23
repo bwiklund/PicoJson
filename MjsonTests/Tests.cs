@@ -1,24 +1,20 @@
 namespace MjsonTests {
   public class Tests {
     [SetUp]
-    public void Setup()
-    {
+    public void Setup() {
     }
 
     [Test]
-    public void Strings()
-    {
-      Assert.That(Mjson.Parse("\"Foo\"").AsString(), Is.EqualTo("Foo"));
-      Assert.That(Mjson.Parse("   \"Foo\"   ").AsString(), Is.EqualTo("Foo"));
-      Assert.That(Mjson.Parse("\"\\\"\"").AsString(), Is.EqualTo("\""));
+    public void Strings() {
+      Assert.That(PicoJson.Parse("\"Foo\"").AsString(), Is.EqualTo("Foo"));
+      Assert.That(PicoJson.Parse("   \"Foo\"   ").AsString(), Is.EqualTo("Foo"));
+      Assert.That(PicoJson.Parse("\"\\\"\"").AsString(), Is.EqualTo("\""));
     }
 
     [Test]
-    public void Numbers()
-    {
-      void AssertNumber(string json, double expected)
-      {
-        Assert.That(Mjson.Parse(json).AsNumber(), Is.EqualTo(expected));
+    public void Numbers() {
+      void AssertNumber(string json, double expected) {
+        Assert.That(PicoJson.Parse(json).AsNumber(), Is.EqualTo(expected));
       }
 
       AssertNumber("1", 1);
@@ -37,11 +33,9 @@ namespace MjsonTests {
     }
 
     [Test]
-    public void Objects()
-    {
-      void AssertObject(string json, Dyn expected)
-      {
-        var obj = Mjson.Parse(json);
+    public void Objects() {
+      void AssertObject(string json, Dyn expected) {
+        var obj = PicoJson.Parse(json);
         Assert.That(obj, Is.EqualTo(expected), $"{obj} did not equal {expected}");
       }
 
@@ -65,11 +59,9 @@ namespace MjsonTests {
     }
 
     [Test]
-    public void Arrays()
-    {
-      void AssertArray(string json, Dyn expected)
-      {
-        var obj = Mjson.Parse(json);
+    public void Arrays() {
+      void AssertArray(string json, Dyn expected) {
+        var obj = PicoJson.Parse(json);
         Assert.That(obj, Is.EqualTo(expected), $"{obj} did not equal {expected}");
       }
       var empty = new Dyn(new List<Dyn>());
