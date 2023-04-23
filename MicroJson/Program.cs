@@ -11,7 +11,7 @@ public class Dyn {
   public Dictionary<string, Dyn>? obj;
 
   public string? AsString() => str;
-  public double? AsDouble() => num;
+  public double? AsNumber() => num;
   public bool? AsBool() => @bool;
   public List<Dyn>? AsArray() => arr;
   public Dictionary<string, Dyn>? AsObject() => obj;
@@ -41,6 +41,11 @@ public class Ctx {
   public int idx;
   public char? Peek() => idx < str.Length ? str[idx] : null;
   public char? Next() => idx < str.Length ? str[idx++] : null;
+  public void Expect(char ch)
+  {
+    var next = Next();
+    if (next != ch) throw new Exception("Expected " + ch + " got " + next);
+  }
 }
 
 public static class Mjson {
@@ -57,20 +62,22 @@ public static class Mjson {
   static Dyn ParseValue(Ctx ctx)
   {
     WhiteSpace(ctx);
-    var value = ctx.Next() switch
-    {
-      '"' => ParseString(ctx),
-      '{' => ParseObject(ctx),
-      //case '[': return ParseArray(ctx);
-      _ => throw new Exception("Can't parse. TBD error message here")
-    };
+    Dyn value;
+    var ch = ctx.Peek();
+    if (ch == '"') value = ParseString(ctx);
+    else if (ch == '{') value = ParseObject(ctx);
+    //else if (ch == '[') value = ParseArray(ctx);
+    else if ((ch >= '0' && ch <= '9') || ch == '.' || ch == '-') value = ParseNumber(ctx);
+    else throw new Exception("Can't parse. TBD error message here");
+
     WhiteSpace(ctx);
     return value;
   }
 
   static void WhiteSpace(Ctx ctx)
   {
-    while (true) {
+    while (true)
+    {
       var ch = ctx.Peek();
       if (ch == ' ' || ch == '\n' || ch == 'r' || ch == '\t')
       {
@@ -83,29 +90,37 @@ public static class Mjson {
 
   static Dyn ParseObject(Ctx ctx)
   {
+    ctx.Expect('{');
     var obj = new Dyn() { obj = new Dictionary<string, Dyn>() };
-    while(true)
+    while (true)
     {
       WhiteSpace(ctx);
-      switch (ctx.Next())
+      switch (ctx.Peek())
       {
         case '"':
           var key = ParseString(ctx); // GC variant of this that's not wrapped in Dyn?
           WhiteSpace(ctx);
-          if (ctx.Next() != ':') throw new Exception("Expected :");
+          ctx.Expect(':');
           var value = ParseValue(ctx);
           obj.obj[key.str!] = value;
           break;
         case '}':
+          ctx.Next();
           return obj;
+        case ',':
+          ctx.Next();
+          break;
+        default:
+          throw new Exception("Expected key or end of object");
       }
     }
   }
 
   static Dyn ParseString(Ctx ctx)
   {
-    var sb = new StringBuilder();
+    var sb = new StringBuilder(); // TODO keep me around i think
 
+    ctx.Expect('"');
     while (ctx.Next() is char ch)
     {
       switch (ch)
@@ -130,5 +145,25 @@ public static class Mjson {
     }
 
     throw new Exception("String never ended!");
+  }
+
+  static Dyn ParseNumber(Ctx ctx)
+  {
+    var sb = new StringBuilder(); // TODO keep me around i think
+
+    while (ctx.Peek() is char ch)
+    {
+      if ((ch >= '0' && ch <= '9') || ch == '.' || ch == '-') // TODO exponents
+      {
+        sb.Append(ch);
+        ctx.Next();
+      }
+      else
+      {
+        break;
+      }
+    }
+
+    return new Dyn(double.Parse(sb.ToString())); // thanks .net. ok but actually is this spec the same? good enough for now
   }
 }

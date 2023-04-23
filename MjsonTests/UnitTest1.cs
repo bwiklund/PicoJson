@@ -13,6 +13,19 @@ namespace MjsonTests {
     }
 
     [Test]
+    public void Numbers()
+    {
+      void AssertNumber(string json, double expected)
+      {
+        Assert.That(Mjson.Parse(json).AsNumber(), Is.EqualTo(expected));
+      }
+
+      AssertNumber("1", 1);
+      AssertNumber("1234567890", 1234567890);
+      AssertNumber("1234567890.75", 1234567890.75);
+    }
+
+    [Test]
     public void Objects()
     {
       void AssertObject(string json, Dictionary<string, Dyn> expected)
@@ -28,9 +41,13 @@ namespace MjsonTests {
       AssertObject("     {     }     ", empty);
 
 
-      var something = new Dictionary<string, Dyn>() { { "foo", new Dyn("bar") } };
-      AssertObject(@"{""foo"":""bar""}", something);
-      AssertObject(@" { ""foo"" : ""bar"" } ", something);
+      var objFooBar = new Dictionary<string, Dyn>() { { "foo", new Dyn("bar") } };
+      AssertObject(@"{""foo"":""bar""}", objFooBar);
+      AssertObject(@" { ""foo"" : ""bar"" } ", objFooBar);
+
+      var objFooBarBaz = new Dictionary<string, Dyn>() { { "foo", new Dyn("bar") }, { "baz", new Dyn(1234) } };
+      AssertObject(@"{""foo"":""bar"",""baz"":1234}", objFooBarBaz);
+      AssertObject(@" { ""foo"" : ""bar"" , ""baz"" : 1234 } ", objFooBarBaz);
     }
   }
 }
