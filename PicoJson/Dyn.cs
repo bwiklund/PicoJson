@@ -49,7 +49,7 @@ public class Dyn {
     return sb.ToString();
   }
 
-  public void ToJson(StringBuilder sb) {
+  private void ToJson(StringBuilder sb) {
     if (str != null) {
       sb.Append('"');
       for(var i  = 0; i < str.Length; i++) {
@@ -59,7 +59,6 @@ public class Dyn {
         else if (ch == '\n') sb.Append("\\n");
         else if (ch == '\r') sb.Append("\\r");
         else if (ch == '\t') sb.Append("\\t");
-        // TODO \u unicode
         else sb.Append(ch);
       }
       sb.Append('"');

@@ -114,6 +114,17 @@ public static class PicoJson {
     return new Dyn(double.Parse(sb.ToString())); // thanks .net. ok but actually is this spec the same? good enough for now
   }
 
+  // note that this returns the number itself, not the char
+  static int ParseHexChar(Ctx ctx) {
+    if (ctx.Next() is char ch) {
+      if (ch >= '0' && ch <= '9') return ch - '0';
+      if (ch >= 'A' && ch <= 'F') return ch - 'A' + 10;
+      if (ch >= 'a' && ch <= 'f') return ch - 'a' + 10;
+      throw new Exception($"Expected hex character at position {ctx.idx}, found '{ch}'");
+    }
+    throw new Exception("Expected hex char, got EOF");
+  }
+
   static Dyn ParseString(Ctx ctx) {
     ctx.Expect('"');
     var sb = new StringBuilder(); // TODO keep me around i think
@@ -123,16 +134,20 @@ public static class PicoJson {
         case '"': return new Dyn() { str = sb.ToString() };
         case '\\':
           var chEscaped = ctx.Next();
-          sb.Append(chEscaped switch {
-            '"' => '"',
-            'b' => '\b',
-            'f' => '\f',
-            'n' => '\n',
-            'r' => '\r',
-            't' => '\t',
-            // TODO \u + 4 hex digits
-            _ => throw new Exception("Invalid escaped character: " + chEscaped)
-          });
+          switch (chEscaped) {
+            case '"': sb.Append('"'); break;
+            case 'b': sb.Append('\b'); break;
+            case 'f': sb.Append('\f'); break;
+            case 'n': sb.Append('\n'); break;
+            case 'r': sb.Append('\r'); break;
+            case 't': sb.Append('\t'); break;
+            case 'u':
+              var unicodeInt = (ParseHexChar(ctx) << 12) | (ParseHexChar(ctx) << 8) | (ParseHexChar(ctx) << 4) | ParseHexChar(ctx);
+              sb.Append((char)unicodeInt);
+              break;
+
+            default: throw new Exception("Invalid escaped character: " + chEscaped); // right? this isn't allowed
+          }
           break;
         default: sb.Append(ch); break;
       }

@@ -2,10 +2,6 @@ using System.Reflection;
 
 namespace MjsonTests {
   public class Tests {
-    [SetUp]
-    public void Setup() {
-    }
-
     [Test]
     public void Nulls() {
       Assert.That(PicoJson.Parse("null").IsNull(), Is.EqualTo(true));
@@ -43,14 +39,19 @@ namespace MjsonTests {
 
     [Test]
     public void Strings() {
-      Assert.That(PicoJson.Parse("\"Foo\"").AsString(), Is.EqualTo("Foo"));
-      Assert.That(PicoJson.Parse("   \"Foo\"   ").AsString(), Is.EqualTo("Foo"));
-      Assert.That(PicoJson.Parse("\"\\\"\"").AsString(), Is.EqualTo("\""));
+      void AssertString(string json, string expected) {
+        Assert.That(PicoJson.Parse(json).AsString(), Is.EqualTo(expected));
+      }
+      AssertString("\"Foo\"", "Foo");
+      AssertString("   \"Foo\"   ", "Foo");
+      AssertString("\"\\\"\"", "\"");
 
       // and escaping
-      Assert.That(new Dyn() { str = "\b\f\n\r\t"}.ToJson(), Is.EqualTo("\"\\b\\f\\n\\r\\t\""));
+      Assert.That(new Dyn() { str = "\b\f\n\r\t" }.ToJson(), Is.EqualTo("\"\\b\\f\\n\\r\\t\""));
 
-      // TODO \u unicode!
+      // and unicode escaping
+      AssertString("\"\\u1234\"", "\u1234");
+      AssertString("\"\\ubeef\"", "\ubeef");
     }
 
     [Test]
@@ -113,7 +114,7 @@ namespace MjsonTests {
       void AssertFile(string path) {
         var jsonFile = File.ReadAllText(path).Replace("\r\n", "\n");
         var obj = PicoJson.Parse(jsonFile);
-        var backToJson = obj.ToJson(); // should tostring really be the serialize method?
+        var backToJson = obj.ToJson();
         Assert.That(backToJson, Is.EqualTo(jsonFile));
       }
 
