@@ -46,6 +46,11 @@ namespace MjsonTests {
       Assert.That(PicoJson.Parse("\"Foo\"").AsString(), Is.EqualTo("Foo"));
       Assert.That(PicoJson.Parse("   \"Foo\"   ").AsString(), Is.EqualTo("Foo"));
       Assert.That(PicoJson.Parse("\"\\\"\"").AsString(), Is.EqualTo("\""));
+
+      // and escaping
+      Assert.That(new Dyn() { str = "\b\f\n\r\t"}.ToJson(), Is.EqualTo("\"\\b\\f\\n\\r\\t\""));
+
+      // TODO \u unicode!
     }
 
     [Test]

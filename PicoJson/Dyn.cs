@@ -52,7 +52,16 @@ public class Dyn {
   public void ToJson(StringBuilder sb) {
     if (str != null) {
       sb.Append('"');
-      sb.Append(str); // TODO escape char by char, and do it straight into the stringbuilder
+      for(var i  = 0; i < str.Length; i++) {
+        var ch = str[i];
+        if (ch == '\b') sb.Append("\\b");
+        else if (ch == '\f') sb.Append("\\f");
+        else if (ch == '\n') sb.Append("\\n");
+        else if (ch == '\r') sb.Append("\\r");
+        else if (ch == '\t') sb.Append("\\t");
+        // TODO \u unicode
+        else sb.Append(ch);
+      }
       sb.Append('"');
     } else if (num != null) {
       sb.Append(num.ToString()); // TODO this probably doesn't have the exact spec as json's number format?
