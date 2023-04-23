@@ -72,12 +72,28 @@ public class Dyn {
 public class Ctx {
   public string str;
   public int idx;
+
   public char? Peek() => idx < str.Length ? str[idx] : null;
+
   public char? Next() => idx < str.Length ? str[idx++] : null;
+
   public void Expect(char ch)
   {
     var next = Next();
-    if (next != ch) throw new Exception("Expected " + ch + " got " + next);
+    if (next != ch) throw new Exception($"Expected '{ch}' at position {idx}, got '{next}' instead");
+  }
+
+  public bool Accept(char ch)
+  {
+    if (Peek() != ch)
+    {
+      return false;
+    }
+    else
+    {
+      idx += 1;
+      return true;
+    }
   }
 }
 
@@ -88,7 +104,7 @@ public static class Mjson {
   {
     var value = ParseValue(ctx);
     // complain if theres garbage after the final valid element
-    if (ctx.idx != ctx.str.Length) throw new Exception("Expected end of string! Error tbd");
+    if (ctx.idx < ctx.str.Length) throw new Exception($"Expected end of string! Found '{(ctx.Peek())}' at position {ctx.idx}");
     return value;
   }
 
@@ -99,9 +115,9 @@ public static class Mjson {
     var ch = ctx.Peek();
     if (ch == '"') value = ParseString(ctx);
     else if (ch == '{') value = ParseObject(ctx);
-    //else if (ch == '[') value = ParseArray(ctx);
+    else if (ch == '[') value = ParseArray(ctx);
     else if ((ch >= '0' && ch <= '9') || ch == '.' || ch == '-') value = ParseNumber(ctx);
-    else throw new Exception("Can't parse. TBD error message here");
+    else throw new Exception($"Couldn't parse character '{ch}' at position {ctx.idx}");
 
     WhiteSpace(ctx);
     return value;
@@ -149,11 +165,29 @@ public static class Mjson {
     }
   }
 
+  static Dyn ParseArray(Ctx ctx)
+  {
+    ctx.Expect('[');
+    var arr = new Dyn() { arr = new List<Dyn>() };
+
+    WhiteSpace(ctx);
+    if (ctx.Accept(']')) {return arr; }
+
+    while (true)
+    {
+      arr.arr.Add(ParseValue(ctx));
+      if (!ctx.Accept(',')) { break; }
+    }
+
+    ctx.Expect(']');
+    return arr;
+  }
+
   static Dyn ParseString(Ctx ctx)
   {
+    ctx.Expect('"');
     var sb = new StringBuilder(); // TODO keep me around i think
 
-    ctx.Expect('"');
     while (ctx.Next() is char ch)
     {
       switch (ch)

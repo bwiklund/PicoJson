@@ -9,6 +9,7 @@ namespace MjsonTests {
     public void Strings()
     {
       Assert.That(Mjson.Parse("\"Foo\"").AsString(), Is.EqualTo("Foo"));
+      Assert.That(Mjson.Parse("   \"Foo\"   ").AsString(), Is.EqualTo("Foo"));
       Assert.That(Mjson.Parse("\"\\\"\"").AsString(), Is.EqualTo("\""));
     }
 
@@ -61,6 +62,29 @@ namespace MjsonTests {
 
       var objNested = new Dyn(new Dictionary<string, Dyn>() { { "foo", new Dyn(new Dictionary<string, Dyn>() { { "baz", new Dyn(1234) } }) } });
       AssertObject(@"{""foo"":{""baz"":1234}}", objNested);
+    }
+
+    [Test]
+    public void Arrays()
+    {
+      void AssertArray(string json, Dyn expected)
+      {
+        var obj = Mjson.Parse(json);
+        Assert.That(obj, Is.EqualTo(expected), $"{obj} did not equal {expected}");
+      }
+      var empty = new Dyn(new List<Dyn>());
+      AssertArray("[]", empty);
+      AssertArray("[ ]", empty);
+      AssertArray(" [ ] ", empty);
+      AssertArray("     [     ]     ", empty);
+      var arrFooBar = new Dyn(new List<Dyn>() { new Dyn("foo"), new Dyn("bar") });
+      AssertArray(@"[""foo"",""bar""]", arrFooBar);
+      AssertArray(@" [ ""foo"" , ""bar"" ] ", arrFooBar);
+      var arrFooBarBaz = new Dyn(new List<Dyn>() { new Dyn("foo"), new Dyn("bar"), new Dyn(1234) });
+      AssertArray(@"[""foo"",""bar"",1234]", arrFooBarBaz);
+      AssertArray(@" [ ""foo"" , ""bar"" , 1234 ] ", arrFooBarBaz);
+      var arrNested = new Dyn(new List<Dyn>() { new Dyn(new List<Dyn>() { new Dyn("foo"), new Dyn("bar") }) });
+      AssertArray(@"[[""foo"",""bar""]]", arrNested);
     }
   }
 }
