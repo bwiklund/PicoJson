@@ -23,31 +23,44 @@ namespace MjsonTests {
       AssertNumber("1", 1);
       AssertNumber("1234567890", 1234567890);
       AssertNumber("1234567890.75", 1234567890.75);
+      AssertNumber(".75", .75);
+      AssertNumber("0.75", 0.75);
+      AssertNumber("-0.75", -0.75);
+      AssertNumber("0", 0);
+      AssertNumber("-0", -0);
+      AssertNumber("-.0", -.0);
+
+      // Assert.Throws<Exception>(() => Mjson.Parse("0."));
+      // todo bad inputs
+      // todo exponents
     }
 
     [Test]
     public void Objects()
     {
-      void AssertObject(string json, Dictionary<string, Dyn> expected)
+      void AssertObject(string json, Dyn expected)
       {
-        Assert.That(Mjson.Parse(json).obj, Is.EqualTo(expected));
+        var obj = Mjson.Parse(json);
+        Assert.That(obj, Is.EqualTo(expected), $"{obj} did not equal {expected}");
       }
 
-      var empty = new Dictionary<string, Dyn>();
+      var empty = new Dyn(new Dictionary<string, Dyn>());
       AssertObject("{}", empty);
       AssertObject("{ }", empty);
       AssertObject(" { }", empty);
       AssertObject(" { } ", empty);
       AssertObject("     {     }     ", empty);
 
-
-      var objFooBar = new Dictionary<string, Dyn>() { { "foo", new Dyn("bar") } };
+      var objFooBar = new Dyn(new Dictionary<string, Dyn>() { { "foo", new Dyn("bar") } });
       AssertObject(@"{""foo"":""bar""}", objFooBar);
       AssertObject(@" { ""foo"" : ""bar"" } ", objFooBar);
 
-      var objFooBarBaz = new Dictionary<string, Dyn>() { { "foo", new Dyn("bar") }, { "baz", new Dyn(1234) } };
+      var objFooBarBaz = new Dyn(new Dictionary<string, Dyn>() { { "foo", new Dyn("bar") }, { "baz", new Dyn(1234) } });
       AssertObject(@"{""foo"":""bar"",""baz"":1234}", objFooBarBaz);
       AssertObject(@" { ""foo"" : ""bar"" , ""baz"" : 1234 } ", objFooBarBaz);
+
+      var objNested = new Dyn(new Dictionary<string, Dyn>() { { "foo", new Dyn(new Dictionary<string, Dyn>() { { "baz", new Dyn(1234) } }) } });
+      AssertObject(@"{""foo"":{""baz"":1234}}", objNested);
     }
   }
 }

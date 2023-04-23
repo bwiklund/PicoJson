@@ -30,9 +30,42 @@ public class Dyn {
     if (str != null) return str == other.str;
     if (num != null) return num == other.num;
     if (@bool != null) return @bool == other.@bool;
-    if (arr != null) return arr == other.arr;
-    if (this.obj != null) return this.obj == other.obj;
+    if (arr != null) return arr.SequenceEqual(other.arr!);
+    if (this.obj != null) return this.obj.SequenceEqual(other.obj!);
     return false;
+  }
+
+  public override int GetHashCode()
+  {
+    if (str != null) return str.GetHashCode();
+    if (num != null) return num.GetHashCode();
+    if (@bool != null) return @bool.GetHashCode();
+    if (arr != null) return arr.GetHashCode();
+    if (obj != null) return obj.GetHashCode();
+    return 0;
+  }
+
+  public override string ToString()
+  {
+    if (str != null) return str;
+    if (num != null) return num.ToString();
+    if (@bool != null) return @bool.ToString();
+    if (arr != null) return arr.ToString();
+    if (obj != null)
+    {
+      var sb = new StringBuilder();
+      sb.Append("{");
+      var first = true;
+      foreach (var kv in obj)
+      {
+        if (!first) sb.Append(",");
+        sb.Append("\"" + kv.Key + "\":" + kv.Value);
+        first = false;
+      }
+      sb.Append("}");
+      return sb.ToString();
+    }
+    return "null";
   }
 }
 
@@ -163,6 +196,8 @@ public static class Mjson {
         break;
       }
     }
+
+    // TODO this doesn't handle the position/count of of - and . chars correctly, check the exact json spec
 
     return new Dyn(double.Parse(sb.ToString())); // thanks .net. ok but actually is this spec the same? good enough for now
   }
