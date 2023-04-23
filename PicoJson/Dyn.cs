@@ -44,25 +44,29 @@ public class Dyn {
   }
 
   public string ToJson() {
-    if (str != null) return $"\"{str.ToString()}\""; // TODO escape
+    var sb = new StringBuilder();
+    ToJson(sb);
+    return sb.ToString();
+  }
 
-    if (num != null) return num.ToString();
-
-    if (@bool != null) return @bool.Value ? "true" : "false";
-
-    if (arr != null) {
-      var sb = new StringBuilder();
+  public void ToJson(StringBuilder sb) {
+    if (str != null) {
+      sb.Append('"');
+      sb.Append(str); // TODO escape char by char, and do it straight into the stringbuilder
+      sb.Append('"');
+    } else if (num != null) {
+      sb.Append(num.ToString()); // TODO this probably doesn't have the exact spec as json's number format?
+    } else if (@bool != null) {
+      sb.Append(@bool.Value ? "true" : "false");
+    } else if (arr != null) {
       sb.Append('[');
-      for(var i  = 0; i < arr.Count; i++) {
+      for (var i = 0; i < arr.Count; i++) {
         if (i > 0) sb.Append(',');
         sb.Append(arr[i].ToJson());
       }
       sb.Append(']');
-      return sb.ToString();
-    }
-
-    if (obj != null) {
-      var sb = new StringBuilder();
+      return;
+    } else if (obj != null) {
       sb.Append('{');
       var first = true;
       foreach (var kv in obj) {
@@ -71,9 +75,9 @@ public class Dyn {
         first = false;
       }
       sb.Append('}');
-      return sb.ToString();
+      return;
+    } else {
+      sb.Append("null");
     }
-
-    return "null";
   }
 }
